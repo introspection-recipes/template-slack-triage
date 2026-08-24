@@ -1,8 +1,8 @@
-# Slack Linear Bug Intake
+# Slack Linear Assistant
 
-Turn a Slack bug report—including screenshots, audio, and video—into a new Linear issue or an evidence comment on a clear duplicate.
+Use Linear from Slack: ask questions, browse teams and projects, query backlogs, create or update issues and comments, or submit a bug report with screenshots, audio, and video.
 
-Mention the bot in a channel report or reply. It reads the conversation, analyzes attachments, checks Linear for duplicates, and replies in the same Slack thread.
+Mention the bot in a channel or reply. It handles any request supported by its declared Linear tools and replies in the same Slack thread. For bug reports, it analyzes attachments, checks for duplicates, and creates an issue or adds an evidence comment.
 
 ## First-time setup
 
@@ -31,6 +31,8 @@ npm run setup
 ```
 
 Setup creates the Introspection runtime, stores the Linear key as a write-only credential, connects Linear, creates and configures the Slack app and connector, and prints a Slack installation link.
+
+For hosted Introspection environments, setup infers the platform page to open after Slack authorization from the API URL. For a custom deployment, set `INTROSPECTION_RETURN_URL` to the page users should return to after authorizing. This is separate from the Slack OAuth callback, which setup configures automatically.
 
 The installation link expires after one hour. If it expires, run `npm run setup` again to get a new link.
 
@@ -70,6 +72,15 @@ Both models use the same gateway, telemetry, and managed credential path. You do
 To choose other models, edit the `ai.model` field in [`agents/agent.yaml`](agents/agent.yaml) or [`agents/media-analyst.yaml`](agents/media-analyst.yaml) before first-time setup. For BYOK, change `llm_mode` in [`.introspection/slack-linear-bug-intake.yaml`](.introspection/slack-linear-bug-intake.yaml) and bind the credential required by your provider. The default BYOK configuration uses one OpenRouter credential for both models.
 
 ## Use the bot
+
+Ask general Linear questions or request supported changes:
+
+```text
+@Introspection List the bugs in the Dev Ex backlog.
+@Introspection Move INT-123 to In Progress and assign it to Atharva.
+```
+
+The bot does not impose a “bug intake only” scope. Its available Slack and Linear tools define what it can do; it will explain a concrete tool limitation only when the requested operation is not available.
 
 People can use the bot naturally in either shape:
 

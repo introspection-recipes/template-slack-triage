@@ -58,9 +58,9 @@ async function introspection(args, options) {
   }
 }
 
-function findBaseUrl(value) {
+export function findBaseUrl(value) {
   if (!value || typeof value !== "object") return null;
-  for (const key of ["api_base_url", "base_url", "url"]) {
+  for (const key of ["cp_url", "api_base_url", "base_url", "url"]) {
     if (typeof value[key] === "string" && /^https?:\/\//.test(value[key])) return value[key];
   }
   for (const nested of Object.values(value)) {
@@ -68,6 +68,35 @@ function findBaseUrl(value) {
     if (found) return found;
   }
   return null;
+}
+
+export function isMissingConnectorError(stderr) {
+  return /(\b404\b|not found|no connector with slug)/i.test(stderr);
+}
+
+export function resolveReturnUrl(baseUrl, explicitReturnUrl) {
+  const candidate = explicitReturnUrl?.trim();
+  if (candidate) {
+    const url = new URL(candidate);
+    if (!/^https?:$/.test(url.protocol)) {
+      throw new Error("INTROSPECTION_RETURN_URL must use http or https");
+    }
+    return url.toString();
+  }
+
+  const url = new URL(baseUrl);
+  if (url.hostname === "api.introspection.dev"
+    || (url.hostname.startsWith("api.") && url.hostname.endsWith(".introspection.dev"))) {
+    url.hostname = `platform.${url.hostname.slice(4)}`;
+    url.pathname = "/";
+    url.search = "";
+    url.hash = "";
+    return url.toString();
+  }
+
+  throw new Error(
+    "Could not determine where to return after connector authorization; set INTROSPECTION_RETURN_URL",
+  );
 }
 
 function objectId(value, label) {
@@ -157,7 +186,7 @@ async function ensureRuntime() {
   }
 }
 
-async function setupSlack(baseUrl) {
+async function setupSlack(baseUrl, returnUrl) {
   const template = await readFile(manifestPath, "utf8");
   const name = botName();
   const redirectUrl = new URL("/v1/oauth/connections/callback", baseUrl).toString();
@@ -165,7 +194,7 @@ async function setupSlack(baseUrl) {
     ["connectors", "get", connectorSlug],
     { allowFailure: true },
   );
-  if (connectorLookup.code !== 0 && !/(404|not found)/i.test(connectorLookup.stderr)) {
+  if (connectorLookup.code !== 0 && !isMissingConnectorError(connectorLookup.stderr)) {
     throw new Error(`Could not check for an existing Slack connector: ${connectorLookup.stderr}`);
   }
   const saved = await existingState();
@@ -225,6 +254,7 @@ async function setupSlack(baseUrl) {
     "--runtime", runtime,
     "--subject", "app",
     "--expires-in", "1h",
+    "--return-url", returnUrl,
   ])).value;
   const authorizeUrl = authorization?.authorization_url
     ?? authorization?.authorize_url
@@ -241,6 +271,7 @@ async function setupSlack(baseUrl) {
     runtime,
     environment,
     redirect_url: redirectUrl,
+    return_url: returnUrl,
     events_request_url: eventsRequestUrl,
     permissions_updated: Boolean(updated.permissions_updated),
     generated_at: new Date().toISOString(),
@@ -256,10 +287,11 @@ async function main() {
   const identity = await introspection(["whoami"]);
   const baseUrl = process.env.INTROSPECTION_API_BASE_URL?.trim() || findBaseUrl(identity.value);
   if (!baseUrl) throw new Error("Could not determine the Introspection API URL; set INTROSPECTION_API_BASE_URL");
+  const returnUrl = resolveReturnUrl(baseUrl, process.env.INTROSPECTION_RETURN_URL);
 
   await ensureRuntime();
   await bindLinear();
-  const slackSetup = await setupSlack(baseUrl);
+  const slackSetup = await setupSlack(baseUrl, returnUrl);
 
   console.log(`Configured Linear MCP for runtime ${runtime} (${environment}).`);
   console.log(`Created or updated Slack app "${slackSetup.name}" (${slackSetup.appId}) and connector ${slackSetup.connectorId}.`);

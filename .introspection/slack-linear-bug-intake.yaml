@@ -6,7 +6,7 @@
 
 name: slack-linear-bug-intake
 path: .
-description: Turns Slack bug reports and media into bounded Linear issue intake
+description: Handles Slack requests through Linear, including queries, updates, comments, and rich bug intake
 
 runtime:
   # Both the main and media models use the ordinary Introspection model gateway.

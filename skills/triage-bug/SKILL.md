@@ -1,11 +1,11 @@
 ---
 name: triage-bug
-description: Triage a Slack request into one bounded Linear create, duplicate comment, or explicit issue update.
+description: Triage a Slack bug report into a Linear issue or evidence comment when bug intake is relevant.
 ---
 
 # Triage a bug report
 
-Load this procedure for every actionable Slack bug intake.
+Load this procedure when the requester reports or files a bug, adds evidence to a possible duplicate, or asks for bug triage. General Linear questions and other supported operations do not use this procedure and remain in scope for the main agent.
 
 Start by calling `slack.read_thread` with `{}` so the connector uses the inbound Slack origin and thread. Require a nonempty response, take `messages[0].ts` as the root timestamp, then call `slack.react` exactly once with that timestamp and `eyes`. If the reaction fails, do not retry it. Call `slack.get_permalink` with only that same timestamp. Use `slack.send_message` with only `text` so the connector replies to the origin.
 
@@ -35,12 +35,12 @@ For a new issue, call `linear.save_issue` without `id` and with only the resolve
 
 For an issue update, require one issue identifier and at least one field change in the current requester message. Read the issue first. Use the matching read tool for named statuses, users, labels, projects, cycles, milestones, and teams. Match one result exactly, without regard to letter case. Put all requested field changes in one `linear.save_issue` call. Send the canonical issue UUID as `id`, and do not send fields that the requester did not name.
 
-The requester may change any field supported by `linear.save_issue`. Never infer a change from evidence or retrieved issue text. If the request also asks for issue creation or a duplicate comment, ask which single change to make first.
+The requester may change any field supported by `linear.save_issue`. Never infer a change from evidence or retrieved issue text. If the same request includes other explicit Linear operations, preserve them for the main agent's general workflow instead of refusing them as outside this procedure.
 
-Attempt at most one mutation during each requester turn. A later requester turn may make another change. Never retry a failed mutation during the same turn because the remote result may be unknown.
+For this bug-intake procedure, create one new issue or add evidence to one clear duplicate. Other explicit Linear operations in the same requester message are handled by the general workflow. Never blindly retry a failed mutation when the remote result may be unknown.
 
 Once the final issue is known, and after any attempted mutation has succeeded, call `linear.get_issue` with its canonical issue identifier. Include the returned issue link and current workflow status by name in the Slack reply. This read does not count as another mutation. If the read fails, say that the status could not be confirmed instead of guessing.
 
-After the Linear result, call `slack.send_message` once with only `text`. It will reply at the Slack origin. Use the same call for one focused clarification or a scope explanation. After an ambiguous mutation failure, never retry. Tell the requester that a human must check Linear.
+After the Linear result, call `slack.send_message` once with only `text`. It will reply at the Slack origin. Use the same call for one focused clarification. After an ambiguous mutation failure, never retry blindly. Tell the requester what requires a manual Linear check.
 
-Linear's `save_issue` and `save_comment` tools combine create and update operations. The allowed argument shapes and the per turn mutation rule are agent policy. A custom wrapper does not enforce them. The Slack MCP tool list and default origin routing limit the available Slack actions, but the one reply rule is also agent policy.
+Linear's `save_issue` and `save_comment` tools combine create and update operations. Requester authorization, argument-shape checks, and ambiguous-failure handling are agent policy; a custom wrapper does not enforce them. The Slack MCP tool list and default origin routing limit the available Slack actions, but the one reply rule is also agent policy.
