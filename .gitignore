@@ -1,0 +1,15 @@
+# Generated Pi runtime state
+.pi/bin/
+.pi/mcp-session.json
+.pi/mcporter.json
+.pi/mcp.local.json
+
+# Generated Introspection CLI local state
+.introspection/local.json
+.introspection/.gitignore
+
+# Local Slack app bootstrap credentials and config tokens
+.slack/
+.env
+secret-file
+.bug-intake/

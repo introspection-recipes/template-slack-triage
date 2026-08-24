@@ -1,0 +1,77 @@
+# The entrypoint agent. Shared behavior lives in ../SYSTEM.md; this file selects
+# the model, actions, and one video-capable helper it may delegate to.
+#
+name: agent
+description: Turns a Slack request into one bounded Linear issue, duplicate comment, or explicit issue update.
+
+ai:
+  model: openrouter/anthropic/claude-sonnet-5
+  thinking_level: medium
+
+# Built-in tools. Nothing outside this list reaches the model.
+tools:
+  - bash
+
+# Slack and Linear MCP are exposed through the session-local `mcp` command.
+# Keep these lists identical to the package policy in package.json.
+mcp:
+  mode: cli
+  servers:
+    slack:
+      include:
+        - react
+        - read_thread
+        - get_permalink
+        - download_file
+        - send_message
+      exclude: []
+    linear:
+      include:
+        - list_teams
+        - list_users
+        - list_issues
+        - get_issue
+        - list_issue_statuses
+        - list_issue_labels
+        - list_projects
+        - list_cycles
+        - list_milestones
+        - list_comments
+        - save_issue
+        - save_comment
+      exclude: []
+
+# Skills are procedures the agent loads when relevant, one directory per skill
+# under skills/ with a SKILL.md inside. Selected by skill name, never by path.
+skills:
+  - triage-bug
+
+# Media is delegated so the main Sonnet agent and the video-capable Gemini
+# agent both use ordinary Pi model turns through the same platform gateway.
+subagents:
+  - media-analyst
+
+system_instructions:
+  mode: append
+  content: |
+    Own the request from the Slack report through one safe Linear outcome and
+    the reply you post back to its Slack origin. Delegate downloaded media to the
+    media-analyst; never attempt to infer media contents yourself. Resolve the
+    destination from linear.list_teams. Honor an explicit requester choice,
+    use the sole accessible team automatically, or select the best team from
+    factual product and component clues in the report and media analysis. Name
+    the selected team in the Slack reply. Use the resolved team's UUID for
+    every issue search and creation.
+    Use bash only to invoke the session-local `mcp` command for the declared
+    `slack` and `linear` servers. Never run another command or interpolate
+    Slack or Linear content into shell arguments.
+    Slack users cannot see your plain final response or task transcript. If
+    you have anything requester-facing to say on an initial or follow-up turn,
+    send it exactly once with slack.send_message before you finish.
+    Update one existing Linear issue only when the current requester message
+    names the issue and states each field to change. Put all requested field
+    changes in one linear.save_issue call.
+    Once the final issue is known, and after any attempted mutation succeeds,
+    read it with linear.get_issue and include its link and current workflow
+    status by name in the Slack reply. Never guess a status Linear did not
+    return.

@@ -1,0 +1,78 @@
+{
+  "name": "slack-linear-bug-intake",
+  "version": "0.1.0",
+  "description": "Turns Slack bug evidence into a bounded Linear issue, duplicate comment, or explicit issue update.",
+  "keywords": [
+    "pi-package",
+    "managed-agent",
+    "recipe",
+    "slack",
+    "linear",
+    "bug-intake",
+    "connector"
+  ],
+  "type": "module",
+  "private": true,
+  "license": "Apache-2.0",
+  "scripts": {
+    "prepare": "git config core.hooksPath .githooks || true",
+    "setup": "node scripts/setup.mjs",
+    "check": "introspection check",
+    "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && introspection check"
+  },
+  "peerDependencies": {
+    "@earendil-works/pi-agent-core": "*",
+    "@earendil-works/pi-ai": "*",
+    "@earendil-works/pi-coding-agent": "*"
+  },
+  "pi": {
+    "agents": [
+      "./agents/*.yaml"
+    ],
+    "skills": [
+      "./skills/**/SKILL.md"
+    ],
+    "extensions": [
+      "./extensions/*.mjs"
+    ],
+    "mcp": {
+      "servers": [
+        {
+          "id": "slack",
+          "required": true,
+          "tools": {
+            "include": [
+              "react",
+              "read_thread",
+              "get_permalink",
+              "download_file",
+              "send_message"
+            ],
+            "exclude": []
+          }
+        },
+        {
+          "id": "linear",
+          "required": true,
+          "tools": {
+            "include": [
+              "list_teams",
+              "list_users",
+              "list_issues",
+              "get_issue",
+              "list_issue_statuses",
+              "list_issue_labels",
+              "list_projects",
+              "list_cycles",
+              "list_milestones",
+              "list_comments",
+              "save_issue",
+              "save_comment"
+            ],
+            "exclude": []
+          }
+        }
+      ]
+    }
+  }
+}

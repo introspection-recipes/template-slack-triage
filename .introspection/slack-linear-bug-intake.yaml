@@ -1,0 +1,36 @@
+# Runtime manifest. The filename stem is the runtime slug and is claimed once per
+# project, so rename this file and `name` together when you adapt the template.
+#
+# Commented keys below are optional examples for repository access and runtime
+# sizing; leave them disabled for this Slack/Linear workflow.
+
+name: slack-linear-bug-intake
+path: .
+description: Turns Slack bug reports and media into bounded Linear issue intake
+
+runtime:
+  # Both the main and media models use the ordinary Introspection model gateway.
+  # Change this to byok only when you intentionally want to supply the provider
+  # credential yourself.
+  llm_mode: managed
+
+  # Repositories this runtime's tasks may check out into /workspace/repos.
+  # Uncomment only if the agent genuinely works on code. Each slug must already
+  # be registered to the project. Reads are implicit; declare write elevations.
+  # github:
+  #   repositories:
+  #     - your-org/your-repo
+  #   permissions:
+  #     contents: write
+  #     pull_requests: write
+
+  # Sandbox sizing. Leave it out until a real workload shows the defaults are
+  # wrong; the platform resolves these against the environment's own limits.
+  # resources:
+  #   requests:
+  #     cpu: "1"
+  #     memory: 2Gi
+  #     storage: 10Gi
+  #   limits:
+  #     cpu: "2"
+  #     memory: 4Gi
