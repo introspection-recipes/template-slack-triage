@@ -14,9 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "24"
+      - uses: introspection-org/recipes-action@v0
 
-      - name: recipe ci (syntax, tests, introspection check)
-        run: npx -y -p @introspection-ai/cli npm run ci
+      - name: recipe tests (syntax + node --test)
+        run: npm test
