@@ -21,10 +21,8 @@
     "test": "node --test",
     "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
   },
-  "peerDependencies": {
-    "@earendil-works/pi-agent-core": "*",
-    "@earendil-works/pi-ai": "*",
-    "@earendil-works/pi-coding-agent": "*"
+  "dependencies": {
+    "@introspection-ai/recipes": "^0.21.0"
   },
   "pi": {
     "agents": [
