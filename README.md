@@ -109,6 +109,69 @@ The bot can also update one existing issue when the message names the issue and 
 
 The bot checks named values against Linear before making the change. It updates only the fields in the message. A later message can make another update.
 
+## Run locally
+
+The recipe also runs outside the Introspection platform — outbound-only. You
+drive the agent from local chat; it reads and writes Slack and Linear through
+their public hosted MCP servers, and downloads Slack files with a token you
+supply. Inbound Slack turns, reply bridging, and thread resume are platform
+features and do not exist locally.
+
+1. **Endpoints and tokens.** Copy the committed example binding and supply
+   tokens (never commit `.pi/mcp.local.json`):
+
+   ```bash
+   cp .pi/mcp.local.example.json .pi/mcp.local.json
+   export SLACK_MCP_TOKEN=...   # Slack hosted-MCP credential
+   export LINEAR_MCP_TOKEN=...  # Linear API key
+   ```
+
+   Whether `mcp.slack.com` accepts a static token is still being verified;
+   if it does not, switch that server to OAuth instead: replace its
+   `headers` entry with `"auth": "oauth"` and complete the browser flow once
+   outside the session with `npx mcporter auth slack --config
+   .pi/mcporter.json` (Linear supports the same). The agent never starts an
+   OAuth flow itself — an unauthenticated call returns
+   `authentication_required`; fix the binding or token and ask it to retry.
+
+2. **Conversation target and files.** Name the conversation the agent
+   answers and, for file downloads, a bot token with `files:read`:
+
+   ```bash
+   export SLACK_CHANNEL_ID=C0123456789
+   export SLACK_THREAD_TS=1712345678.000100   # optional; omit for top-level
+   export SLACK_BOT_TOKEN=xoxb-...
+   ```
+
+   Downloads land under `./files/slack` in the session workspace.
+
+3. **Models.** The default `openrouter/…` model ids assume the managed
+   gateway. Locally either export `OPENROUTER_API_KEY` or edit `ai.model`
+   in `agents/agent.yaml` and `agents/media-analyst.yaml`.
+
+4. **Run.** Start a session with your Pi-compatible runner (for example
+   `introspection local`) from the recipe root and talk to the `agent`
+   entrypoint.
+
+Because the package ships `mcp.json` with the hosted endpoints, a session
+starts even before tokens are configured; the first Slack or Linear call
+then reports what is missing.
+
+## Hosted Slack MCP transition
+
+The platform is moving Slack from an in-pod MCP server to Slack's public
+hosted server. This recipe declares both tool catalogs during the
+transition — the in-pod names (`read_thread`, `send_message`, …) and the
+hosted names (`slack_read_thread`, `slack_send_message`) — and the agent
+checks `mcp list slack` to see which its session serves. Two consequences
+worth knowing:
+
+- On the hosted server, the bot's replies are authored by the workspace
+  member who authorized the Slack MCP connection, not by the bot identity.
+- After the platform cutover, re-run the Slack connect flow once so the
+  connection records the identities used to recognize the assistant's own
+  posts.
+
 ## Safety and limits
 
 - The bot makes at most one Linear change for each Slack message. One change can update several fields on one issue.
@@ -131,6 +194,10 @@ introspection check
 | `agents/agent.yaml` | Main Sonnet intake agent and exact MCP allowlist |
 | `agents/media-analyst.yaml` | Video-capable Gemini subagent |
 | `extensions/bug-intake-tools.mjs` | Task-file media reader and narrow Pi media serialization bridge |
+| `extensions/slack-tools.mjs` | `slack_origin` (conversation target) and `slack_workspace_download_file` |
+| `lib/slack-glue.mjs` | Origin/env resolution and the guarded Slack file download |
+| `mcp.json` | Hosted MCP endpoints (Slack, Linear) the package carries portably |
+| `.pi/mcp.local.example.json` | Local binding template (copy to `.pi/mcp.local.json`) |
 | `skills/triage-bug/SKILL.md` | Duplicate and issue-quality procedure |
 | `scripts/setup.mjs` | Linear credential/MCP binding plus two-phase Slack app/connector setup |
 | `slack-app/manifest.template.json` | Slack app scopes and events |

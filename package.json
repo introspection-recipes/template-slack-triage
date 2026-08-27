@@ -19,7 +19,7 @@
     "setup": "node scripts/setup.mjs",
     "check": "introspection check",
     "test": "node --test",
-    "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
+    "ci": "node --check extensions/bug-intake-tools.mjs && node --check extensions/slack-tools.mjs && node --check lib/bug-intake.mjs && node --check lib/slack-glue.mjs && node --check scripts/setup.mjs && node --test && introspection check"
   },
   "peerDependencies": {
     "@earendil-works/pi-agent-core": "*",
@@ -47,7 +47,9 @@
               "read_thread",
               "get_permalink",
               "download_file",
-              "send_message"
+              "send_message",
+              "slack_read_thread",
+              "slack_send_message"
             ],
             "exclude": []
           }
@@ -73,6 +75,9 @@
             "exclude": []
           }
         }
+      ],
+      "manifests": [
+        "mcp.json"
       ]
     }
   }

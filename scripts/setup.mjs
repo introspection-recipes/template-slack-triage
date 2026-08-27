@@ -1,4 +1,8 @@
 #!/usr/bin/env node
+// TODO(slack-hosted-mcp): once the platform's Slack MCP grant leg ships
+// (introspection-cloud docs/design/slack-hosted-mcp.md, spike S1), add the
+// second Slack credential here alongside `bindLinear` — either a supplied
+// static secret or the OAuth leg, whichever the spike selects.
 
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";

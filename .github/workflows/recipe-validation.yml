@@ -18,5 +18,5 @@ jobs:
         with:
           node-version: "24"
 
-      - name: introspection check
-        run: npx -y -p @introspection-ai/cli introspection check
+      - name: recipe ci (syntax, tests, introspection check)
+        run: npx -y -p @introspection-ai/cli npm run ci
