@@ -13,3 +13,6 @@
 .env
 secret-file
 .bug-intake/
+
+# Dependencies
+node_modules/
