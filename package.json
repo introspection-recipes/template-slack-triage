@@ -19,7 +19,10 @@
     "setup": "node scripts/setup.mjs",
     "check": "introspection check",
     "test": "node --test",
-    "ci": "node --check extensions/bug-intake-tools.mjs && node --check extensions/slack-tools.mjs && node --check lib/bug-intake.mjs && node --check lib/slack-glue.mjs && node --check scripts/setup.mjs && node --test && introspection check"
+    "ci": "node --check extensions/bug-intake-tools.mjs && node --check extensions/slack-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
+  },
+  "dependencies": {
+    "@introspection-ai/recipes": "^0.22.0"
   },
   "peerDependencies": {
     "@earendil-works/pi-agent-core": "*",

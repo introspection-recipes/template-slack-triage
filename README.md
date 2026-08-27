@@ -196,8 +196,12 @@ The platform is moving Slack from an in-pod MCP server to Slack's public
 hosted server. This recipe declares both tool catalogs during the
 transition — the in-pod names (`read_thread`, `send_message`, …) and the
 hosted names (`slack_read_thread`, `slack_send_message`) — and the agent
-checks `mcp list slack` to see which its session serves. Two consequences
-worth knowing:
+checks `mcp list slack` to see which its session serves. The Slack glue
+(`slack_origin`, `slack_workspace_download_file`, the download root shared
+with bug intake) comes from `@introspection-ai/recipes/slack`, so this
+recipe requires `@introspection-ai/recipes` >= 0.22 on the host (cloud
+runtime and CLI alike) — extension imports of the library resolve against
+the host's installed instance. Two consequences worth knowing:
 
 - On the hosted server, the bot's replies are authored by the workspace
   member who authorized the Slack MCP connection, not by the bot identity.
@@ -227,8 +231,7 @@ introspection check
 | `agents/agent.yaml` | Main Sonnet intake agent and exact MCP allowlist |
 | `agents/media-analyst.yaml` | Video-capable Gemini subagent |
 | `extensions/bug-intake-tools.mjs` | Task-file media reader and narrow Pi media serialization bridge |
-| `extensions/slack-tools.mjs` | `slack_origin` (conversation target) and `slack_workspace_download_file` |
-| `lib/slack-glue.mjs` | Origin/env resolution and the guarded Slack file download |
+| `extensions/slack-tools.mjs` | Wires `slack_origin` and `slack_workspace_download_file` from `@introspection-ai/recipes/slack` |
 | `mcp.json` | Hosted MCP endpoints (Slack, Linear) the package carries portably |
 | `.pi/mcp.local.example.json` | Local binding template (copy to `.pi/mcp.local.json`) |
 | `skills/triage-bug/SKILL.md` | Duplicate and issue-quality procedure |
