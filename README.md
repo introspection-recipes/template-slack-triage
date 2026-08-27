@@ -157,6 +157,39 @@ Because the package ships `mcp.json` with the hosted endpoints, a session
 starts even before tokens are configured; the first Slack or Linear call
 then reports what is missing.
 
+### Verify the local posture
+
+The point of the hosted-MCP move is that this recipe behaves the same
+locally as on the platform. From the recipe root, with the env from steps
+1–3 exported, run `introspection local` and walk these five checks in the
+session:
+
+1. **Servers resolve.** Ask the agent to run `mcp list slack` and
+   `mcp list linear`. Each must list tools from the hosted server (the
+   `slack_*` names locally). An empty list or `authentication_required`
+   means the binding or token from step 1 is wrong — fix it and ask the
+   agent to retry; nothing else needs restarting.
+2. **Origin resolves.** Say `where are you posting?` — the agent's
+   `slack_origin` call must return your `SLACK_CHANNEL_ID` (and
+   `SLACK_THREAD_TS` if set), not an error naming the env vars.
+3. **Outbound Slack.** Ask it to post a short test message. The message
+   must appear in that channel, authored by the identity that authorized
+   your Slack MCP credential.
+4. **File download.** Upload a small image to the channel, give the agent
+   its file id (or ask it to read the thread and find it), and ask it to
+   download the file. Expect a path under `./files/slack/` plus a size and
+   sha256 in the reply; a missing `SLACK_BOT_TOKEN` fails with a typed
+   error before any network call.
+5. **Linear round-trip.** Ask for a read (`list the teams`) and, if you
+   want the full intake path, report a fake bug and confirm the issue lands
+   in Linear with the Slack permalink in its description.
+
+What must NOT work locally — treat these as correct behavior, not bugs:
+nobody's Slack message starts a session (inbound turns are platform
+ingress), and replies to the agent's posts do not resume the conversation
+(reply bridging is platform bookkeeping). Outbound-only is the local
+contract.
+
 ## Hosted Slack MCP transition
 
 The platform is moving Slack from an in-pod MCP server to Slack's public
