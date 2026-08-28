@@ -19,8 +19,8 @@ tools:
   - slack_download_file
   - slack_send_message
 
-# Linear MCP is exposed through the session-local `mcp` command. Slack is a
-# set of Recipe-owned Pi tools registered by extensions/slack-tools.mjs.
+# Linear MCP is exposed through the session-local `mcp` command. The package
+# manifest declares the Slack tools that the Recipes host registers.
 mcp:
   mode: cli
   servers:

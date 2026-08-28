@@ -159,7 +159,7 @@ introspection check
 | `agents/agent.yaml`                | Main Sonnet intake agent and exact tool allowlist                              |
 | `agents/media-analyst.yaml`        | Video-capable Gemini subagent                                                  |
 | `extensions/bug-intake-tools.mjs`  | Task-file media reader and narrow Pi media serialization bridge                |
-| `extensions/slack-tools.mjs`       | Slack Bot API tools supplied by the Recipes package                            |
+| `package.json#pi.connectors`       | Slack Bot API tool declaration loaded by the Recipes host                      |
 | `skills/triage-bug/SKILL.md`       | Duplicate and issue-quality procedure                                          |
 | `scripts/setup.mjs`                | Linear credential/MCP binding plus two-phase Slack app/connector setup         |
 | `slack-app/manifest.template.json` | Slack app scopes and events                                                    |

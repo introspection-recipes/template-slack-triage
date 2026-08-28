@@ -34,6 +34,22 @@
     "extensions": [
       "./extensions/*.mjs"
     ],
+    "connectors": [
+      {
+        "provider": "slack",
+        "tools": {
+          "include": [
+            "origin",
+            "read_thread",
+            "read_history",
+            "react",
+            "get_permalink",
+            "download_file",
+            "send_message"
+          ]
+        }
+      }
+    ],
     "mcp": {
       "servers": [
         {
