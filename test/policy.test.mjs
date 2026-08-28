@@ -43,6 +43,7 @@ test("Slack uses Recipe tools instead of MCP", () => {
   assert.deepEqual(packageManifest.pi.connectors, [
     {
       provider: "slack",
+      package: "@introspection-ai/recipe-connector-slack",
       tools: { include: shortNames },
     },
   ]);
