@@ -109,6 +109,34 @@ The bot can also update one existing issue when the message names the issue and 
 
 The bot checks named values against Linear before making the change. It updates only the fields in the message. A later message can make another update.
 
+## Test Recipe changes
+
+Use `introspection dev` to test local Recipe edits against a real Slack event in
+the development environment:
+
+```bash
+introspection dev --runtime slack-linear-bug-intake --logs
+```
+
+The cloud task uses your local Recipe files. Slack sends events through the
+normal Events API webhook, and the Recipe calls the Slack Web API through the
+cloud provider proxy. You do not need a local Slack server or a hosted MCP
+token.
+
+Use `introspection local` for an outbound test that does not create or resume a
+cloud task:
+
+```bash
+export SLACK_BOT_TOKEN='xoxb-...'
+export SLACK_CHANNEL_ID='C0123456789'
+export SLACK_THREAD_TS='1234567890.123456' # optional
+introspection local -p 'Read the Slack origin and send a short test reply.'
+```
+
+The local run calls Slack directly with the bot token. It can read, react,
+reply, and download files. It cannot receive Slack events or record a cloud
+reply bridge because no cloud task exists.
+
 ## Safety and limits
 
 - The bot makes at most one Linear change for each Slack message. One change can update several fields on one issue.
@@ -125,15 +153,16 @@ introspection check
 
 ## Package shape
 
-| Path | Responsibility |
-| --- | --- |
-| `SYSTEM.md` | Invocation, trust, Slack/Linear MCP, triage, mutation, and reply policy |
-| `agents/agent.yaml` | Main Sonnet intake agent and exact MCP allowlist |
-| `agents/media-analyst.yaml` | Video-capable Gemini subagent |
-| `extensions/bug-intake-tools.mjs` | Task-file media reader and narrow Pi media serialization bridge |
-| `skills/triage-bug/SKILL.md` | Duplicate and issue-quality procedure |
-| `scripts/setup.mjs` | Linear credential/MCP binding plus two-phase Slack app/connector setup |
-| `slack-app/manifest.template.json` | Slack app scopes and events |
+| Path                               | Responsibility                                                                 |
+| ---------------------------------- | ------------------------------------------------------------------------------ |
+| `SYSTEM.md`                        | Invocation, trust, Slack tools, Linear MCP, triage, mutation, and reply policy |
+| `agents/agent.yaml`                | Main Sonnet intake agent and exact tool allowlist                              |
+| `agents/media-analyst.yaml`        | Video-capable Gemini subagent                                                  |
+| `extensions/bug-intake-tools.mjs`  | Task-file media reader and narrow Pi media serialization bridge                |
+| `extensions/slack-tools.mjs`       | Slack Bot API tools supplied by the Recipes package                            |
+| `skills/triage-bug/SKILL.md`       | Duplicate and issue-quality procedure                                          |
+| `scripts/setup.mjs`                | Linear credential/MCP binding plus two-phase Slack app/connector setup         |
+| `slack-app/manifest.template.json` | Slack app scopes and events                                                    |
 
 ## License
 
