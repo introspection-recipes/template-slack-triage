@@ -21,6 +21,9 @@
     "test": "node --test",
     "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
   },
+  "dependencies": {
+    "@introspection-ai/recipe-connector-slack": "^0.1.0"
+  },
   "pi": {
     "agents": [
       "./agents/*.yaml"

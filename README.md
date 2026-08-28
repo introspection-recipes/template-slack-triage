@@ -27,6 +27,7 @@ export LINEAR_API_KEY='lin_api_...'
 export SLACK_APP_CONFIG_TOKEN='xoxe.xoxp-...'
 export SLACK_BOT_NAME='Acme Bug Concierge' # optional; defaults to "Introspection"
 
+npm install
 npm run setup
 ```
 
@@ -127,6 +128,7 @@ Use `introspection local` for an outbound test that does not create or resume a
 cloud task:
 
 ```bash
+npm install
 export SLACK_BOT_TOKEN='xoxb-...'
 export SLACK_CHANNEL_ID='C0123456789'
 export SLACK_THREAD_TS='1234567890.123456' # optional
@@ -159,7 +161,7 @@ introspection check
 | `agents/agent.yaml`                | Main Sonnet intake agent and exact tool allowlist                              |
 | `agents/media-analyst.yaml`        | Video-capable Gemini subagent                                                  |
 | `extensions/bug-intake-tools.mjs`  | Task-file media reader and narrow Pi media serialization bridge                |
-| `package.json#pi.connectors`       | Slack Bot API tool declaration loaded by the Recipes host                      |
+| `package.json`                     | Slack connector dependency and tool declaration                               |
 | `skills/triage-bug/SKILL.md`       | Duplicate and issue-quality procedure                                          |
 | `scripts/setup.mjs`                | Linear credential/MCP binding plus two-phase Slack app/connector setup         |
 | `slack-app/manifest.template.json` | Slack app scopes and events                                                    |
