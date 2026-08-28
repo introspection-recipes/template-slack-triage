@@ -40,3 +40,14 @@ test("agent and package slack tool policies stay identical", () => {
     assert.match(agent, new RegExp(`- ${name}$`, "m"), `agent.yaml missing slack include ${name}`);
   }
 });
+
+test("the transition documents each server's argument names", () => {
+  for (const document of [system, skill]) {
+    assert.match(document, /"channel":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","thread_ts":"ORIGIN_THREAD_TS"/);
+    assert.match(document, /"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","message_ts":"ORIGIN_THREAD_OR_MESSAGE_TS"/);
+    assert.match(document, /"channel":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","limit":50/);
+    assert.match(document, /"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","limit":50/);
+    assert.match(document, /"message_ts":"ROOT_MESSAGE_TS_FROM_READ_THREAD","emoji":"eyes"/);
+    assert.match(document, /"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","message_ts":"ROOT_MESSAGE_TS_FROM_READ_THREAD","emoji":"eyes"/);
+  }
+});

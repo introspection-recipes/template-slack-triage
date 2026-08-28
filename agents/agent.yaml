@@ -22,18 +22,21 @@ mcp:
   mode: cli
   servers:
     slack:
-      # Dual catalog during the hosted-MCP transition: the first five are the
+      # Dual catalog during the hosted-MCP transition: the first six are the
       # in-pod server's names (cloud today), the slack_* names are the hosted
       # server's (local runs, and cloud after the cutover). Each server simply
       # doesn't serve the other set; run `mcp list slack` to see which apply.
       include:
         - react
         - read_thread
+        - read_history
         - get_permalink
         - download_file
         - send_message
         - slack_read_thread
+        - slack_read_channel
         - slack_send_message
+        - slack_add_reaction
       exclude: []
     linear:
       include:
@@ -70,9 +73,10 @@ system_instructions:
     explicit supported changes. Use the triage-bug skill when the requester is
     reporting or filing a bug. Delegate downloaded media to the media-analyst;
     never attempt to infer media contents yourself.
-    Resolve the conversation with the slack_origin tool first and pass its
-    channel and thread_ts explicitly to every Slack MCP call. Download Slack
-    files with the slack_workspace_download_file tool, never through `mcp`.
+    Resolve the conversation with the slack_origin tool first. Use the exact
+    argument mapping in SYSTEM.md for the Slack server this session lists.
+    Never target another channel or thread. Download Slack files with the
+    slack_workspace_download_file tool, never through `mcp`.
     Use bash only to invoke the session-local `mcp` command for the declared
     `slack` and `linear` servers. Never run another command or interpolate
     Slack or Linear content into shell arguments.

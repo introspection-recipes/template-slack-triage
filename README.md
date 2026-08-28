@@ -122,17 +122,14 @@ features and do not exist locally.
 
    ```bash
    cp .pi/mcp.local.example.json .pi/mcp.local.json
-   export SLACK_MCP_TOKEN=...   # Slack hosted-MCP credential
+   export SLACK_MCP_TOKEN=xoxp-...  # Slack app user token
    export LINEAR_MCP_TOKEN=...  # Linear API key
    ```
 
-   Whether `mcp.slack.com` accepts a static token is still being verified;
-   if it does not, switch that server to OAuth instead: replace its
-   `headers` entry with `"auth": "oauth"` and complete the browser flow once
-   outside the session with `npx mcporter auth slack --config
-   .pi/mcporter.json` (Linear supports the same). The agent never starts an
-   OAuth flow itself — an unauthenticated call returns
-   `authentication_required`; fix the binding or token and ask it to retry.
+   `SLACK_MCP_TOKEN` is the user token issued when a Slack app requests user
+   scopes. It normally starts with `xoxp-`. It is not the bot token. Keep
+   Slack token rotation disabled for this recipe because its current
+   connection flow does not refresh rotated Slack tokens.
 
 2. **Conversation target and files.** Name the conversation the agent
    answers and, for file downloads, a bot token with `files:read`:
@@ -194,8 +191,9 @@ contract.
 
 The platform is moving Slack from an in-pod MCP server to Slack's public
 hosted server. This recipe declares both tool catalogs during the
-transition — the in-pod names (`read_thread`, `send_message`, …) and the
-hosted names (`slack_read_thread`, `slack_send_message`) — and the agent
+transition — the in-pod names (`read_thread`, `read_history`, `send_message`,
+`react`) and the hosted names (`slack_read_thread`, `slack_read_channel`,
+`slack_send_message`, `slack_add_reaction`) — and the agent
 checks `mcp list slack` to see which its session serves. The Slack glue
 (`slack_origin`, `slack_workspace_download_file`, the download root shared
 with bug intake) comes from `@introspection-ai/recipes/slack`, so this
@@ -205,9 +203,9 @@ the host's installed instance. Two consequences worth knowing:
 
 - On the hosted server, the bot's replies are authored by the workspace
   member who authorized the Slack MCP connection, not by the bot identity.
-- After the platform cutover, re-run the Slack connect flow once so the
-  connection records the identities used to recognize the assistant's own
-  posts.
+- Existing workspaces must run the Slack connect flow once after this update.
+  The same consent screen adds the hosted MCP user grant while preserving the
+  bot grant used for inbound events and file downloads.
 
 ## Safety and limits
 

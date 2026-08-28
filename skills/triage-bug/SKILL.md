@@ -7,7 +7,7 @@ description: Triage a Slack bug report into a Linear issue or evidence comment w
 
 Load this procedure when the requester reports or files a bug, adds evidence to a possible duplicate, or asks for bug triage. General Linear questions and other supported operations do not use this procedure and remain in scope for the main agent.
 
-Start by calling the `slack_origin` tool for the conversation's `channel` and `thread_ts`, then run `mcp list slack` once to see which Slack tool names this session serves (`read_thread` or `slack_read_thread`, `send_message` or `slack_send_message`). Read the origin thread with the served read tool, passing the origin channel and thread explicitly. Require a nonempty response and take `messages[0].ts` as the root timestamp. When a reaction tool is served, call it exactly once with the origin channel, that timestamp, and `eyes`; skip the acknowledgement when none is listed, and never retry a failed reaction. Resolve the permalink with `get_permalink` when served, else build the `archives/CHANNEL/pTS` fragment (TS without its dot) from the origin. Send replies with the served send tool, passing `text` plus the origin channel and non-null thread.
+Start by calling the `slack_origin` tool for the conversation's `channel` and `thread_ts`, then run `mcp list slack` once. The in-pod server serves `read_thread`, `read_history`, `send_message`, and `react`. The hosted server serves `slack_read_thread`, `slack_read_channel`, `slack_send_message`, and `slack_add_reaction`. When the origin has a `thread_ts`, read it with `read_thread` using `channel` and `thread_ts`, or with `slack_read_thread` using `channel_id` and `message_ts`. When `thread_ts` is null, read the direct-message lane with `read_history` using `channel`, or with `slack_read_channel` using `channel_id`; request at most 50 messages. Require a nonempty response and take `messages[0].ts` as the root timestamp. When a reaction tool is served, call it exactly once. For `react`, pass `message_ts` and `emoji`. For `slack_add_reaction`, pass `channel_id`, `message_ts`, and `emoji`. Skip the acknowledgement when neither is listed, and never retry a failed reaction. Resolve the permalink with `get_permalink` when served, else build the `archives/CHANNEL/pTS` fragment (TS without its dot) from the origin. For `send_message`, pass `text` and the non-null origin `thread_ts`. For `slack_send_message`, pass `channel_id`, `message`, and the non-null origin `thread_ts`.
 
 The requester cannot see the task transcript or a plain assistant final response. On any turn, including a resumed follow-up that needs no new Linear work, send any requester-facing answer through the served send tool exactly once before ending. End without sending only when there is genuinely no requester-facing response, and never leave an answer solely in the final task record.
 
@@ -19,12 +19,40 @@ mcp call slack.read_thread --json - <<'SLACK_MCP_INPUT'
 SLACK_MCP_INPUT
 ```
 
-Substitute `slack.slack_read_thread` when that is the served name; the origin arguments are the same.
+When `slack_read_thread` is served, use its hosted field names:
+
+```bash
+mcp call slack.slack_read_thread --json - <<'SLACK_HOSTED_READ_INPUT'
+{"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","message_ts":"ORIGIN_THREAD_OR_MESSAGE_TS"}
+SLACK_HOSTED_READ_INPUT
+```
+
+When `slack_origin.thread_ts` is null, use the served history tool:
+
+```bash
+mcp call slack.read_history --json - <<'SLACK_HISTORY_INPUT'
+{"channel":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","limit":50}
+SLACK_HISTORY_INPUT
+```
+
+```bash
+mcp call slack.slack_read_channel --json - <<'SLACK_HOSTED_HISTORY_INPUT'
+{"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","limit":50}
+SLACK_HOSTED_HISTORY_INPUT
+```
 
 ```bash
 mcp call slack.react --json - <<'SLACK_REACT_INPUT'
-{"channel":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","message_ts":"ROOT_MESSAGE_TS_FROM_READ_THREAD","emoji":"eyes"}
+{"message_ts":"ROOT_MESSAGE_TS_FROM_READ_THREAD","emoji":"eyes"}
 SLACK_REACT_INPUT
+```
+
+When `slack_add_reaction` is served, use:
+
+```bash
+mcp call slack.slack_add_reaction --json - <<'SLACK_HOSTED_REACT_INPUT'
+{"channel_id":"ORIGIN_CHANNEL_FROM_SLACK_ORIGIN","message_ts":"ROOT_MESSAGE_TS_FROM_READ_THREAD","emoji":"eyes"}
+SLACK_HOSTED_REACT_INPUT
 ```
 
 For each unique media file in the returned messages, call the `slack_workspace_download_file` Pi tool with its file ID. When a video file's Slack metadata contains a nonempty `mp4_low`, pass `variant: "video_low"`; use the default original variant for other media. The lower-bitrate video is an analysis copy, not a replacement for the reporter's attachment. Download at most eight files. Start at most one fresh `media-analyst` run per live sandbox session with only the exact `path` values returned by those downloads. Do not copy or invent file IDs, names, MIME types, sizes, or hashes for the child. It calls `read_bug_media` and receives the actual files in its ordinary Gemini model turn through the platform gateway. Child run IDs do not survive a sandbox restart: if `agent wait` returns `Unknown agent run id` for a carried media run, start exactly one fresh media run with the already verified download paths. Do not start a second fresh run after a current-session failure. If a download or current-session analysis fails, continue from the Slack text and attachment metadata. Do not claim that you viewed or heard failed media.
@@ -43,6 +71,6 @@ For this bug-intake procedure, create one new issue or add evidence to one clear
 
 Once the final issue is known, and after any attempted mutation has succeeded, call `linear.get_issue` with its canonical issue identifier. Include the returned issue link and current workflow status by name in the Slack reply. This read does not count as another mutation. If the read fails, say that the status could not be confirmed instead of guessing.
 
-After the Linear result, call the served send tool once with `text` plus the origin channel and non-null thread, so the reply lands in the conversation. Use the same call for one focused clarification. After an ambiguous mutation failure, never retry blindly. Tell the requester what requires a manual Linear check.
+After the Linear result, call the served send tool once with the exact fields defined above, so the reply lands in the conversation. Use the same call for one focused clarification. After an ambiguous mutation failure, never retry blindly. Tell the requester what requires a manual Linear check.
 
 Linear's `save_issue` and `save_comment` tools combine create and update operations. Requester authorization, argument-shape checks, and ambiguous-failure handling are agent policy; a custom wrapper does not enforce them. The Slack MCP tool list and the slack_origin-scoped routing limit the available Slack actions, but the one reply rule is also agent policy.

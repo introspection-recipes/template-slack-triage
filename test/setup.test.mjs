@@ -1,11 +1,18 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 import {
   findBaseUrl,
   isMissingConnectorError,
+  renderManifest,
   resolveReturnUrl,
 } from "../scripts/setup.mjs";
+
+const manifestTemplate = await readFile(
+  new URL("../slack-app/manifest.template.json", import.meta.url),
+  "utf8",
+);
 
 test("findBaseUrl recognizes the current CLI cp_url field", () => {
   assert.equal(
@@ -59,4 +66,22 @@ test("resolveReturnUrl rejects an unknown deployment without an override", () =>
     () => resolveReturnUrl("https://api.example.com"),
     /set INTROSPECTION_RETURN_URL/,
   );
+});
+
+test("Slack install requests the hosted user grant without token rotation", () => {
+  const manifest = renderManifest(manifestTemplate, {
+    redirectUrl: "https://api.example.com/v1/oauth/connections/callback",
+    eventsRequestUrl: "https://api.example.com/v1/webhooks/slack/connector-id",
+  });
+  assert.deepEqual(manifest.oauth_config.scopes.user, [
+    "channels:history",
+    "chat:write",
+    "files:read",
+    "groups:history",
+    "im:history",
+    "mpim:history",
+    "reactions:write",
+    "users:read",
+  ]);
+  assert.equal(manifest.settings.token_rotation_enabled, false);
 });

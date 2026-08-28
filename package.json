@@ -43,11 +43,14 @@
             "include": [
               "react",
               "read_thread",
+              "read_history",
               "get_permalink",
               "download_file",
               "send_message",
               "slack_read_thread",
-              "slack_send_message"
+              "slack_read_channel",
+              "slack_send_message",
+              "slack_add_reaction"
             ],
             "exclude": []
           }
