@@ -1,0 +1,14 @@
+{
+  "servers": [
+    {
+      "id": "slack",
+      "name": "Slack",
+      "base_url": "https://mcp.slack.com/mcp"
+    },
+    {
+      "id": "linear",
+      "name": "Linear",
+      "base_url": "https://mcp.linear.app/mcp"
+    }
+  ]
+}

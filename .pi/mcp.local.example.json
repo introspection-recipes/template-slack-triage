@@ -1,0 +1,20 @@
+{
+  "servers": [
+    {
+      "id": "slack",
+      "transport": "streamable_http",
+      "url": "https://mcp.slack.com/mcp",
+      "headers": {
+        "Authorization": "Bearer ${SLACK_MCP_TOKEN}"
+      }
+    },
+    {
+      "id": "linear",
+      "transport": "streamable_http",
+      "url": "https://mcp.linear.app/mcp",
+      "headers": {
+        "Authorization": "Bearer ${LINEAR_MCP_TOKEN}"
+      }
+    }
+  ]
+}

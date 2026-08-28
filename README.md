@@ -109,6 +109,104 @@ The bot can also update one existing issue when the message names the issue and 
 
 The bot checks named values against Linear before making the change. It updates only the fields in the message. A later message can make another update.
 
+## Run locally
+
+The recipe also runs outside the Introspection platform — outbound-only. You
+drive the agent from local chat; it reads and writes Slack and Linear through
+their public hosted MCP servers, and downloads Slack files with a token you
+supply. Inbound Slack turns, reply bridging, and thread resume are platform
+features and do not exist locally.
+
+1. **Endpoints and tokens.** Copy the committed example binding and supply
+   tokens (never commit `.pi/mcp.local.json`):
+
+   ```bash
+   cp .pi/mcp.local.example.json .pi/mcp.local.json
+   export SLACK_MCP_TOKEN=xoxp-...  # Slack app user token
+   export LINEAR_MCP_TOKEN=...  # Linear API key
+   ```
+
+   `SLACK_MCP_TOKEN` is the user token issued when a Slack app requests user
+   scopes. It normally starts with `xoxp-`. It is not the bot token. Keep
+   Slack token rotation disabled for this recipe because its current
+   connection flow does not refresh rotated Slack tokens.
+
+2. **Conversation target and files.** Name the conversation the agent
+   answers and, for file downloads, a bot token with `files:read`:
+
+   ```bash
+   export SLACK_CHANNEL_ID=C0123456789
+   export SLACK_THREAD_TS=1712345678.000100   # optional; omit for top-level
+   export SLACK_BOT_TOKEN=xoxb-...
+   ```
+
+   Downloads land under `./files/slack` in the session workspace.
+
+3. **Models.** The default `openrouter/…` model ids assume the managed
+   gateway. Locally either export `OPENROUTER_API_KEY` or edit `ai.model`
+   in `agents/agent.yaml` and `agents/media-analyst.yaml`.
+
+4. **Run.** Start a session with your Pi-compatible runner (for example
+   `introspection local`) from the recipe root and talk to the `agent`
+   entrypoint.
+
+Because the package ships `mcp.json` with the hosted endpoints, a session
+starts even before tokens are configured; the first Slack or Linear call
+then reports what is missing.
+
+### Verify the local posture
+
+The point of the hosted-MCP move is that this recipe behaves the same
+locally as on the platform. From the recipe root, with the env from steps
+1–3 exported, run `introspection local` and walk these five checks in the
+session:
+
+1. **Servers resolve.** Ask the agent to run `mcp list slack` and
+   `mcp list linear`. Each must list tools from the hosted server (the
+   `slack_*` names locally). An empty list or `authentication_required`
+   means the binding or token from step 1 is wrong — fix it and ask the
+   agent to retry; nothing else needs restarting.
+2. **Origin resolves.** Say `where are you posting?` — the agent's
+   `slack_origin` call must return your `SLACK_CHANNEL_ID` (and
+   `SLACK_THREAD_TS` if set), not an error naming the env vars.
+3. **Outbound Slack.** Ask it to post a short test message. The message
+   must appear in that channel, authored by the identity that authorized
+   your Slack MCP credential.
+4. **File download.** Upload a small image to the channel, give the agent
+   its file id (or ask it to read the thread and find it), and ask it to
+   download the file. Expect a path under `./files/slack/` plus a size and
+   sha256 in the reply; a missing `SLACK_BOT_TOKEN` fails with a typed
+   error before any network call.
+5. **Linear round-trip.** Ask for a read (`list the teams`) and, if you
+   want the full intake path, report a fake bug and confirm the issue lands
+   in Linear with the Slack permalink in its description.
+
+What must NOT work locally — treat these as correct behavior, not bugs:
+nobody's Slack message starts a session (inbound turns are platform
+ingress), and replies to the agent's posts do not resume the conversation
+(reply bridging is platform bookkeeping). Outbound-only is the local
+contract.
+
+## Hosted Slack MCP transition
+
+The platform is moving Slack from an in-pod MCP server to Slack's public
+hosted server. This recipe declares both tool catalogs during the
+transition — the in-pod names (`read_thread`, `read_history`, `send_message`,
+`react`) and the hosted names (`slack_read_thread`, `slack_read_channel`,
+`slack_send_message`, `slack_add_reaction`) — and the agent
+checks `mcp list slack` to see which its session serves. The Slack glue
+(`slack_origin`, `slack_workspace_download_file`, the download root shared
+with bug intake) comes from `@introspection-ai/recipes/slack`, so this
+recipe requires `@introspection-ai/recipes` >= 0.22 on the host (cloud
+runtime and CLI alike) — extension imports of the library resolve against
+the host's installed instance. Two consequences worth knowing:
+
+- On the hosted server, the bot's replies are authored by the workspace
+  member who authorized the Slack MCP connection, not by the bot identity.
+- Existing workspaces must run the Slack connect flow once after this update.
+  The same consent screen adds the hosted MCP user grant while preserving the
+  bot grant used for inbound events and file downloads.
+
 ## Safety and limits
 
 - The bot makes at most one Linear change for each Slack message. One change can update several fields on one issue.
@@ -131,6 +229,9 @@ introspection check
 | `agents/agent.yaml` | Main Sonnet intake agent and exact MCP allowlist |
 | `agents/media-analyst.yaml` | Video-capable Gemini subagent |
 | `extensions/bug-intake-tools.mjs` | Task-file media reader and narrow Pi media serialization bridge |
+| `extensions/slack-tools.mjs` | Wires `slack_origin` and `slack_workspace_download_file` from `@introspection-ai/recipes/slack` |
+| `mcp.json` | Hosted MCP endpoints (Slack, Linear) the package carries portably |
+| `.pi/mcp.local.example.json` | Local binding template (copy to `.pi/mcp.local.json`) |
 | `skills/triage-bug/SKILL.md` | Duplicate and issue-quality procedure |
 | `scripts/setup.mjs` | Linear credential/MCP binding plus two-phase Slack app/connector setup |
 | `slack-app/manifest.template.json` | Slack app scopes and events |

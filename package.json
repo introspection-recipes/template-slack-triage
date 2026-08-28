@@ -18,11 +18,11 @@
     "prepare": "git config core.hooksPath .githooks || true",
     "setup": "node scripts/setup.mjs",
     "check": "introspection check",
-    "test": "node --test",
-    "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
+    "test": "node --check extensions/bug-intake-tools.mjs && node --check extensions/slack-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test",
+    "ci": "npm test && introspection check"
   },
   "dependencies": {
-    "@introspection-ai/recipes": "^0.21.0"
+    "@introspection-ai/recipes": "^0.22.0"
   },
   "pi": {
     "agents": [
@@ -43,9 +43,14 @@
             "include": [
               "react",
               "read_thread",
+              "read_history",
               "get_permalink",
               "download_file",
-              "send_message"
+              "send_message",
+              "slack_read_thread",
+              "slack_read_channel",
+              "slack_send_message",
+              "slack_add_reaction"
             ],
             "exclude": []
           }
@@ -71,6 +76,9 @@
             "exclude": []
           }
         }
+      ],
+      "manifests": [
+        "mcp.json"
       ]
     }
   }

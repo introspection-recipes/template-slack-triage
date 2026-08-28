@@ -15,3 +15,6 @@ jobs:
       - uses: actions/checkout@v4
 
       - uses: introspection-org/recipes-action@v0
+
+      - name: recipe tests (syntax + node --test)
+        run: npm test
