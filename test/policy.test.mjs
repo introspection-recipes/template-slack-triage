@@ -31,31 +31,28 @@ test("writes still require requester authority", () => {
 test("Slack uses Recipe tools instead of MCP", () => {
   const serverIds = packageManifest.pi.mcp.servers.map((server) => server.id);
   assert.deepEqual(serverIds, ["linear"]);
-  const shortNames = [
-    "origin",
-    "read_thread",
-    "read_history",
-    "react",
-    "get_permalink",
-    "download_file",
-    "send_message",
+  const channelTools = [
+    "channel_info",
+    "channel_reply",
+    "channel_history",
+    "channel_react",
+    "channel_fetch_file",
   ];
   assert.deepEqual(packageManifest.pi.connectors, [
     {
       provider: "slack",
-      package: "@introspection-ai/recipe-connector-slack",
-      tools: { include: shortNames },
+      tools: { include: channelTools },
     },
   ]);
-  for (const tool of shortNames) {
-    assert.match(agent, new RegExp(`\\n  - slack_${tool}\\n`));
+  for (const tool of channelTools) {
+    assert.match(agent, new RegExp(`\\n  - ${tool}\\n`));
   }
   assert.doesNotMatch(system, /mcp call slack/);
   assert.doesNotMatch(system, /Slack MCP/);
 });
 
 test("Slack writes stay on the origin and are not retried", () => {
-  assert.match(system, /Do not pass `thread_ts` or `start_new_thread`/);
+  assert.match(system, /already bound to the origin conversation/);
   assert.match(system, /If the reaction fails, do not retry it/);
   assert.match(system, /If a mutation call fails, do not retry it/);
 });

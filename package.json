@@ -37,16 +37,13 @@
     "connectors": [
       {
         "provider": "slack",
-        "package": "@introspection-ai/recipe-connector-slack",
         "tools": {
           "include": [
-            "origin",
-            "read_thread",
-            "read_history",
-            "react",
-            "get_permalink",
-            "download_file",
-            "send_message"
+            "channel_info",
+            "channel_reply",
+            "channel_history",
+            "channel_react",
+            "channel_fetch_file"
           ]
         }
       }
