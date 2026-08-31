@@ -33,14 +33,13 @@ test("Slack uses Recipe tools instead of MCP", () => {
   assert.deepEqual(serverIds, ["linear"]);
   const channelTools = [
     "channel_reply",
-    "channel_history",
+    "channel_read",
     "channel_react",
     "channel_fetch_file",
   ];
   assert.deepEqual(packageManifest.pi.connectors, [
     {
       provider: "slack",
-      tools: { include: channelTools },
     },
   ]);
   for (const tool of channelTools) {

@@ -36,15 +36,7 @@
     ],
     "connectors": [
       {
-        "provider": "slack",
-        "tools": {
-          "include": [
-            "channel_reply",
-            "channel_history",
-            "channel_react",
-            "channel_fetch_file"
-          ]
-        }
+        "provider": "slack"
       }
     ],
     "mcp": {

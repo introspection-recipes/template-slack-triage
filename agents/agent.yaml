@@ -12,12 +12,12 @@ ai:
 tools:
   - bash
   - channel_reply
-  - channel_history
+  - channel_read
   - channel_react
   - channel_fetch_file
 
-# Linear MCP is exposed through the session-local `mcp` command. The package
-# manifest declares the channel tools that the Slack connector registers.
+# Linear MCP is exposed through the session-local `mcp` command. The connector
+# enables Slack, and this agent list selects the Slack package tools it uses.
 mcp:
   mode: cli
   servers:
