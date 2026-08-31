@@ -32,7 +32,6 @@ test("Slack uses Recipe tools instead of MCP", () => {
   const serverIds = packageManifest.pi.mcp.servers.map((server) => server.id);
   assert.deepEqual(serverIds, ["linear"]);
   const channelTools = [
-    "channel_info",
     "channel_reply",
     "channel_history",
     "channel_react",
@@ -49,6 +48,7 @@ test("Slack uses Recipe tools instead of MCP", () => {
   }
   assert.doesNotMatch(system, /mcp call slack/);
   assert.doesNotMatch(system, /Slack MCP/);
+  assert.doesNotMatch(system, /channel_info/);
 });
 
 test("Slack writes stay on the origin and are not retried", () => {

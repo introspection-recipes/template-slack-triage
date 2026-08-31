@@ -11,7 +11,6 @@ ai:
 # Built-in tools. Nothing outside this list reaches the model.
 tools:
   - bash
-  - channel_info
   - channel_reply
   - channel_history
   - channel_react

@@ -39,7 +39,6 @@
         "provider": "slack",
         "tools": {
           "include": [
-            "channel_info",
             "channel_reply",
             "channel_history",
             "channel_react",
