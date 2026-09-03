@@ -34,7 +34,7 @@
     "extensions": [
       "./extensions/*.mjs"
     ],
-    "connectors": [
+    "channels": [
       {
         "provider": "slack"
       }
