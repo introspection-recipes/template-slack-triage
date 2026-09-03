@@ -22,7 +22,7 @@
     "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
   },
   "dependencies": {
-    "@introspection-ai/recipes": "^0.21.0"
+    "@introspection-ai/recipe-channel-slack": "^0.1.0"
   },
   "pi": {
     "agents": [
@@ -34,22 +34,13 @@
     "extensions": [
       "./extensions/*.mjs"
     ],
+    "connectors": [
+      {
+        "provider": "slack"
+      }
+    ],
     "mcp": {
       "servers": [
-        {
-          "id": "slack",
-          "required": true,
-          "tools": {
-            "include": [
-              "react",
-              "read_thread",
-              "get_permalink",
-              "download_file",
-              "send_message"
-            ],
-            "exclude": []
-          }
-        },
         {
           "id": "linear",
           "required": true,
