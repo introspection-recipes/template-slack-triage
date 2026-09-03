@@ -124,20 +124,8 @@ normal Events API webhook, and the Recipe calls the Slack Web API through the
 cloud provider proxy. You do not need a local Slack server or a hosted MCP
 token.
 
-Use `introspection local` for an outbound test that does not create or resume a
-cloud task:
-
-```bash
-npm install
-export SLACK_BOT_TOKEN='xoxb-...'
-export SLACK_CHANNEL_ID='C0123456789'
-export SLACK_THREAD_TS='1234567890.123456' # optional
-introspection local -p 'Read the Slack origin and send a short test reply.'
-```
-
-The local run calls Slack directly with the bot token. It can read, react,
-reply, and download files. It cannot receive Slack events or record a cloud
-reply bridge because no cloud task exists.
+Use `introspection dev` for both inbound events and outbound channel tools.
+Standalone channel access through `introspection local` is not supported.
 
 ## Safety and limits
 
