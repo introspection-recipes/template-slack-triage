@@ -4,7 +4,7 @@
 # Commented keys below are optional examples for repository access and runtime
 # sizing; leave them disabled for this Slack/Linear workflow.
 
-name: slack-linear-bug-intake
+name: slack-triage
 path: .
 description: Handles Slack requests through Linear, including queries, updates, comments, and rich bug intake
 

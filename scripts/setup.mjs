@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 const recipeRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const manifestPath = resolve(recipeRoot, "slack-app", "manifest.template.json");
 const statePath = resolve(recipeRoot, ".slack", "setup.json");
-const runtime = process.env.INTROSPECTION_RUNTIME?.trim() || "slack-linear-bug-intake";
+const runtime = process.env.INTROSPECTION_RUNTIME?.trim() || "slack-triage";
 const environment = process.env.INTROSPECTION_ENVIRONMENT?.trim() || "production";
 const connectorSlug = process.env.SLACK_CONNECTOR_SLUG?.trim() || "bug-intake-slack";
 

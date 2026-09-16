@@ -1,5 +1,5 @@
 {
-  "name": "slack-linear-bug-intake",
+  "name": "@introspection-recipes/slack-triage",
   "version": "0.1.0",
   "description": "Handles Slack requests through Linear, including queries, updates, comments, and rich bug intake.",
   "keywords": [
@@ -21,8 +21,8 @@
     "test": "node --test",
     "ci": "node --check extensions/bug-intake-tools.mjs && node --check lib/bug-intake.mjs && node --check scripts/setup.mjs && node --test && introspection check"
   },
-  "dependencies": {
-    "@introspection-ai/recipes": "^0.21.0"
+  "peerDependencies": {
+    "@introspection-ai/recipes": "*"
   },
   "pi": {
     "agents": [
