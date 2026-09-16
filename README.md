@@ -69,7 +69,7 @@ The recipe uses Introspection's managed model gateway by default:
 
 Both models use the same gateway, telemetry, and managed credential path. You do not need a model API key for the default setup.
 
-To choose other models, edit the `ai.model` field in [`agents/agent.yaml`](agents/agent.yaml) or [`agents/media-analyst.yaml`](agents/media-analyst.yaml) before first-time setup. For BYOK, change `llm_mode` in [`.introspection/slack-linear-bug-intake.yaml`](.introspection/slack-linear-bug-intake.yaml) and bind the credential required by your provider. The default BYOK configuration uses one OpenRouter credential for both models.
+To choose other models, edit the `ai.model` field in [`agents/agent.yaml`](agents/agent.yaml) or [`agents/media-analyst.yaml`](agents/media-analyst.yaml) before first-time setup. For BYOK, change `llm_mode` in [`.introspection/slack-triage.yaml`](.introspection/slack-triage.yaml) and bind the credential required by your provider. The default BYOK configuration uses one OpenRouter credential for both models.
 
 ## Use the bot
 

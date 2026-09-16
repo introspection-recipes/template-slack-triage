@@ -16,3 +16,6 @@ secret-file
 
 # Dependencies
 node_modules/
+
+# Secrets and local state. `introspection dev` stages with `git add -A`.
+.env.*
